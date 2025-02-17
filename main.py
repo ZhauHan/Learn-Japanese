@@ -35,27 +35,25 @@ if __name__ == "__main__":
       quiz_choice = 0
     
     #hiragana quiz
+    keys = random.sample(keys, quiz_length)
     answers = []
     if quiz_choice == "1" or quiz_choice =="2":
       for i in range(quiz_length):
-        random_index = random.randint(0, len(kanas.keys())-1)
-        random_key = keys[random_index]
+        random_key = keys[i]
         print(f"Question {i+1}: {random_key}")
         
         if quiz_choice == "1":
-          answers.append(hiragana[random_key])
+          answers.append(hiragana[keys[i]])
         elif quiz_choice == "2":
-          answers.append(katakana[random_key])
+          answers.append(katakana[keys[i]])
     
     elif quiz_choice == "3":
       for i in range(quiz_length):
         random_kana = random.choice([['hiragana', hiragana], ['katakana' ,katakana]])
-        random_index = random.randint(0, len(kanas.keys()))
-        random_key = keys[random_index]
-        
-        print(f"Question {i+1}: {random_key} ({random_kana[0]})")
+        random_key = keys[i]
+        print(f"Question {i+1}: {random_key} ({random_kana[keys[i]]})")
    
-        answers.append(random_kana[1][random_key])
+        answers.append(random_kana[1][keys[i]])
     else:
       print("Invalid choice. Please try again.")
       invalid_input = True
