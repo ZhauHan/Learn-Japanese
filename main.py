@@ -51,7 +51,7 @@ if __name__ == "__main__":
       for i in range(quiz_length):
         random_kana = random.choice([['hiragana', hiragana], ['katakana' ,katakana]])
         random_key = keys[i]
-        print(f"Question {i+1}: {random_key} ({random_kana[keys[i]]})")
+        print(f"Question {i+1}: {random_key} ({random_kana[0]})")
    
         answers.append(random_kana[1][keys[i]])
     else:
