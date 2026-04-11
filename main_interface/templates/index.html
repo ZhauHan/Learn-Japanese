@@ -4,180 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Interface</title>
-    <!-- <link rel="stylesheet" href="styles.css"> -->
+    <style>
+        /* General body styling */
+        /* General body styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e2f, #3a3a5f);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Flex container for canvas and prediction box */
+        .container {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center; /* Vertically align items */
+            gap: 20px; /* Add space between the canvas and prediction box */
+        }
+
+        /* Canvas styling */
+        #mainCanvas {
+            border: 2px solid #ffffff;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            background-color: #000;
+        }
+
+        /* Prediction box styling */
+        #prediction-box {
+            width: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #prediction-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #ffee00;
+        }
+
+        #prediction-content {
+            font-size: 16px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        /* Buttons styling */
+        #buttons-box button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: 2px solid #ffffff;
+            border-radius: 5px;
+            background: #1e1e2f;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        #buttons-box button:hover {
+            background: #3a3a5f;
+            border-color: #ffee00;
+            color: #ffee00;
+            transform: scale(1.02);
+        }
+
+        #buttons-box button:active {
+            background: #ffee00;
+            color: #1e1e2f;
+            transform: scale(0.95);
+        }
+
+    </style>
 </head>
 <body>
-    <canvas id="mainCanvas">
-            Your browser does not support the HTML5 canvas element.        
-    </canvas>
-    <div id="prediction" style="position: absolute; top: 90px; left: 10px; color: white; font-size: 18px;"></div>
+    <div class="container">
+        <div id="prediction-box">
+            <div id="prediction-title">Prediction</div>
+            <div id="prediction-content">None</div>
+        </div>
+        <canvas id="mainCanvas" width="640" height="640">
+            Your browser does not support the HTML5 canvas element.
+        </canvas>
+        <div id="buttons-box"></div>
+    </div>
 </body>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
 </html>
-
-<script>
-    const canvas = document.getElementById('mainCanvas');
-    const ctx = canvas.getContext('2d');
-
-    // Set canvas dimensions
-    canvas.width = 640;
-    canvas.height = 640;
-
-    // Draw 64x64 grid
-    const gridSize = 64;
-    const cellSize = canvas.width / gridSize;
-
-    // Create a 2D array to store grid information
-    const grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
-
-    // Set the background to black
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.strokeStyle = '#333'; // Grid line color
-
-    // Draw vertical lines
-    for (let x = 0; x <= canvas.width; x += cellSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-    }
-
-    // Draw horizontal lines
-    for (let y = 0; y <= canvas.height; y += cellSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-    }
-
-    let isDrawing = false;
-    let penSize = 3.5; // Default pen size
-
-    // Helper function to draw on the grid
-    function drawCell(x, y) {
-        const col = Math.floor(x / cellSize);
-        const row = Math.floor(y / cellSize);
-
-        for (let i = -Math.floor(penSize / 2); i < Math.ceil(penSize / 2); i++) {
-            for (let j = -Math.floor(penSize / 2); j < Math.ceil(penSize / 2); j++) {
-                const currentRow = row + i;
-                const currentCol = col + j;
-
-                if (
-                    currentRow >= 0 &&
-                    currentRow < gridSize &&
-                    currentCol >= 0 &&
-                    currentCol < gridSize
-                ) {
-                    if (grid[currentRow][currentCol] === 0) {
-                        grid[currentRow][currentCol] = 1;
-                        ctx.fillStyle = 'white';
-                        ctx.fillRect(
-                            currentCol * cellSize,
-                            currentRow * cellSize,
-                            cellSize,
-                            cellSize
-                        );
-                        ctx.strokeRect(
-                            currentCol * cellSize,
-                            currentRow * cellSize,
-                            cellSize,
-                            cellSize
-                        );
-                    }
-                }
-            }
-        }
-    }
-
-    // Event listeners for drag and draw
-    canvas.addEventListener('mousedown', (event) => {
-        isDrawing = true;
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        drawCell(x, y);
-    });
-
-    canvas.addEventListener('mousemove', (event) => {
-        if (isDrawing) {
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            drawCell(x, y);
-        }
-    });
-
-    canvas.addEventListener('mouseup', () => {
-        isDrawing = false;
-    });
-
-    canvas.addEventListener('mouseleave', () => {
-        isDrawing = false;
-    });
-
-    // Example: Change pen size dynamically
-    document.addEventListener('keydown', (event) => {
-        if (event.key === '+') {
-            penSize = Math.min(penSize + 1, gridSize); // Increase pen size
-        } else if (event.key === '-') {
-            penSize = Math.max(penSize - 1, 1); // Decrease pen size
-        }
-    });
-
-    // Function to log the grid values
-    function logGridValues() {
-        console.clear(); // Clear the console for better readability
-        console.table(grid); // Log the grid as a table in the console
-    }
-
-    // Function to send the grid data to the backend
-    function predictKana() {
-        const gridData = JSON.stringify(grid); // Convert the grid to JSON
-
-        fetch('/predict', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: gridData,
-        })
-            .then((response) => {
-                if (response.ok) {
-                    console.log('Grid data sent successfully!');
-                    response.json().then((data) => {
-                        console.log('Predicted Kana:', data.predictions);
-                        // Display the prediction
-                        const predictionElement = document.getElementById('prediction');
-                        predictionElement.textContent = `Prediction: ${data.predictions}`;
-                    });
-                } else {
-                    console.error('Failed to send grid data.');
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-    }
-
-    // Example: Add a button to trigger the log function
-    const logButton = document.createElement('button');
-    logButton.textContent = 'Log Grid Values';
-    logButton.style.position = 'absolute';
-    logButton.style.top = '10px';
-    logButton.style.left = '10px';
-    document.body.appendChild(logButton);
-
-    logButton.addEventListener('click', logGridValues);
-
-    // Example: Add a button to trigger the send function
-    const sendButton = document.createElement('button');
-    sendButton.textContent = 'Predict Kana';
-    sendButton.style.position = 'absolute';
-    sendButton.style.top = '50px';
-    sendButton.style.left = '10px';
-    document.body.appendChild(sendButton);
-
-    sendButton.addEventListener('click', predictKana);
-</script>
