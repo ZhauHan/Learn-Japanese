@@ -5,9 +5,15 @@ import torch
 
 app = Flask(__name__)
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# 🚨 Force CPU (Render has no GPU)
+DEVICE = torch.device("cpu")
+
+# Load lookup table (safe at startup)
 with open("lookup.pkl", "rb") as f:
     TRANSLATION_TABLE = pickle.load(f)
+
+# 🚨 Lazy-load model (IMPORTANT FIX)
+MODEL = None
 
 def load_model():
     model = KanaCNN().to(DEVICE)
@@ -15,42 +21,60 @@ def load_model():
     model.eval()
     return model
 
-MODEL = load_model()
+def get_model():
+    global MODEL
+    if MODEL is None:
+        print("Loading model...")
+        MODEL = load_model()
+    return MODEL
+
 
 @app.get("/")
 def index():
     return render_template("index.html")
 
+
 @app.post("/predict")
 def predict_kana():
     try:
         grid = request.get_json()
+
+        if grid is None:
+            return jsonify({"error": "No JSON received"}), 400
+
         print("Received grid:", type(grid))
 
-        # Step 1
-        print("Converting to tensor...")
+        # Validate shape
+        if not isinstance(grid, list) or len(grid) != 64:
+            return jsonify({"error": "Grid must be 64x64"}), 400
+
+        if any(not isinstance(row, list) or len(row) != 64 for row in grid):
+            return jsonify({"error": "Each row must have 64 columns"}), 400
+
+        # Convert to tensor
         x = torch.tensor(grid, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(DEVICE)
 
-        # Step 2
-        print("Running model...")
+        # Load model safely (lazy)
+        model = get_model()
+
         with torch.inference_mode():
-            y = MODEL(x)
+            y = model(x)
+            y = torch.argmax(y, dim=1)
 
-        # Step 3
-        print("Argmax...")
-        y = torch.argmax(y, dim=1)
+        idx = y.item()
 
-        # Step 4
-        print("Index:", y.item())
+        # Safe lookup
+        prediction = TRANSLATION_TABLE.get(idx, "Unknown")
 
-        print("Lookup...")
-        prediction = TRANSLATION_TABLE[y.item()]
-
-        return jsonify({"status": "success", "predictions": prediction})
+        return jsonify({
+            "status": "success",
+            "predictions": prediction
+        })
 
     except Exception as e:
         print("🔥 ERROR:", str(e))
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run(debug=True)
