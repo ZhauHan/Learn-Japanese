@@ -23,29 +23,34 @@ def index():
 
 @app.post("/predict")
 def predict_kana():
-    grid = request.get_json(force=True)
+    try:
+        grid = request.get_json()
+        print("Received grid:", type(grid))
 
-    # if not isinstance(payload, dict) or "body" not in payload:
-    #     return jsonify({"status": "error", "message": "Expected JSON like {\"body\": grid}"}), 400
+        # Step 1
+        print("Converting to tensor...")
+        x = torch.tensor(grid, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(DEVICE)
 
-  
-    print("Received grid:", grid)
+        # Step 2
+        print("Running model...")
+        with torch.inference_mode():
+            y = MODEL(x)
 
-    if not isinstance(grid, list) or len(grid) != 64:
-        return jsonify({"status": "error", "message": "Grid must have 64 rows"}), 400
+        # Step 3
+        print("Argmax...")
+        y = torch.argmax(y, dim=1)
 
-    if any(not isinstance(row, list) or len(row) != 64 for row in grid):
-        return jsonify({"status": "error", "message": "Each row must have 64 columns"}), 400
+        # Step 4
+        print("Index:", y.item())
 
-    x = torch.tensor(grid, dtype=torch.float32, device=DEVICE).unsqueeze(0).unsqueeze(0)  # [1,1,64,64]
+        print("Lookup...")
+        prediction = TRANSLATION_TABLE[y.item()]
 
-    with torch.inference_mode():
-        y = MODEL(x)
-        y = torch.argmax(y, dim=1)  # Get predicted class index
-        print(y)  # Debug: print raw output tensor
-        print(TRANSLATION_TABLE[y.item()])  # Debug: print translation table
-    prediction = TRANSLATION_TABLE[y.item()]  # Convert to list for JSON serialization
-    return jsonify({"status": "success", "predictions": prediction})
+        return jsonify({"status": "success", "predictions": prediction})
+
+    except Exception as e:
+        print("🔥 ERROR:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
