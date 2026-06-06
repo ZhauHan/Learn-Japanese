@@ -5,14 +5,14 @@ import torch
 
 app = Flask(__name__)
 
-# 🚨 Force CPU (Render has no GPU)
+# Force CPU (Render has no GPU)
 DEVICE = torch.device("cpu")
 
 # Load lookup table (safe at startup)
 with open("lookup.pkl", "rb") as f:
     TRANSLATION_TABLE = pickle.load(f)
 
-# 🚨 Lazy-load model (IMPORTANT FIX)
+# Lazy-load model
 MODEL = None
 
 def load_model():
