@@ -7,16 +7,8 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <div id="prediction-box">
-            <div id="prediction-title">Prediction</div>
-            <div id="prediction-content">None</div>
-        </div>
-        <canvas id="mainCanvas" width="640" height="640">
-            Your browser does not support the HTML5 canvas element.
-        </canvas>
-        <div id="buttons-box"></div>
-    </div>
+    {% include 'predict.html' %}
+
 </body>
-<script src="{{ url_for('static', filename='main.js') }}"></script>
+<!-- <script src="{{ url_for('static', filename='main.js') }}"></script> -->
 </html>

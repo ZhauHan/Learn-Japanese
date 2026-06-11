@@ -4,11 +4,13 @@ class CanvasGrid {
         this.ctx = this.canvas.getContext('2d');
         this.gridSize = gridSize;
         this.penSize = penSize;
+        this.defaultPenSize = penSize;
         this.cellSize = this.canvas.width / this.gridSize;
         this.grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
         this.isDrawing = false;
         this.setupCanvas();
         this.addEventListeners();
+        console.log('hi');
     }
 
     setupCanvas() {
@@ -93,12 +95,7 @@ class CanvasGrid {
         this.grid = Array.from({ length: this.gridSize }, () => Array(this.gridSize).fill(0));
         this.setupCanvas();
         this.isDrawing = false;
-        this.penSize = penSize;
-
-        // Remove and re-add event listeners
-        this.canvas.replaceWith(this.canvas.cloneNode(true));
-        this.canvas = document.getElementById(this.canvas.id); // Rebind the canvas
-        this.addEventListeners();
+        this.penSize = this.defaultPenSize;
     }
 }   
 
@@ -107,30 +104,23 @@ class PredictionHandler {
         this.grid = grid;
     }
 
-    predictKana() {
+    async predictKana() {
         const gridData = this.grid.getGridData();
-        fetch('/predict', {
+        const response = await fetch('/predict', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: gridData,
-        })
-            .then((response) => {
-                if (response.ok) {
-                    console.log('Grid data sent successfully!');
-                    response.json().then((data) => {
-                        console.log('Predicted Kana:', data.predictions);
-                        const predictionElement = document.getElementById('prediction-content');
-                        predictionElement.textContent = `Prediction: ${data.predictions}`;
-                    });
-                } else {
-                    console.error('Failed to send grid data.');
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+        });
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Predicted Kana:', data.predictions);
+            return data.predictions;
+        } else {
+            console.error('Failed to send grid data.');
+            return null;
+        }
     }
 }
 
@@ -140,6 +130,12 @@ class UIManager {
         this.predictionHandler = predictionHandler;
         this.createButtons();
     }
+
+    displayPrediction(prediction) {
+        const predictionElement = document.getElementById('prediction-content');
+        predictionElement.textContent = `Prediction: ${prediction}`;
+    }   
+
     createButtons() {
         const buttonsBox = document.getElementById('buttons-box'); // Get the buttons-box container
 
@@ -155,8 +151,9 @@ class UIManager {
         const sendButton = document.createElement('button');
         sendButton.textContent = 'Predict Kana';
         sendButton.style.margin = '5px';
-        sendButton.addEventListener('click', () => {
-            this.predictionHandler.predictKana();
+        sendButton.addEventListener('click', async () => {
+            const prediction = await this.predictionHandler.predictKana();
+            this.displayPrediction(prediction);
         });
         buttonsBox.appendChild(sendButton);
 
@@ -170,6 +167,3 @@ class UIManager {
     }
 }
 
-const canvasGrid = new CanvasGrid('mainCanvas');
-const predictionHandler = new PredictionHandler(canvasGrid);
-const uiManager = new UIManager(canvasGrid, predictionHandler);

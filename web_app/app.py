@@ -33,6 +33,18 @@ def get_model():
 def index():
     return render_template("index.html")
 
+@app.get("/predict")
+def predict():
+    return render_template("predict.html")
+
+@app.get("/quiz")
+def quiz():
+    return render_template("quiz.html")
+
+@app.get("/results")
+def results():
+    return render_template("results.html")
+
 
 @app.post("/predict")
 def predict_kana():
