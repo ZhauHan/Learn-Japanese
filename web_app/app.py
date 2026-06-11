@@ -50,7 +50,7 @@ def predict_kana():
 
         if any(not isinstance(row, list) or len(row) != 64 for row in grid):
             return jsonify({"error": "Each row must have 64 columns"}), 400
-
+        
         # Convert to tensor
         x = torch.tensor(grid, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(DEVICE)
 
@@ -62,9 +62,9 @@ def predict_kana():
             y = torch.argmax(y, dim=1)
 
         idx = y.item()
-
+        print(TRANSLATION_TABLE)
         # Safe lookup
-        prediction = TRANSLATION_TABLE.get(idx, "Unknown")
+        prediction = TRANSLATION_TABLE[idx] if 0 <= idx < len(TRANSLATION_TABLE) else "Unknown"
 
         return jsonify({
             "status": "success",

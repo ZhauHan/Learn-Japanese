@@ -1,0 +1,83 @@
+ /* General body styling */
+/* General body styling */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #3a3a5f);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Flex container for canvas and prediction box */
+.container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center; /* Vertically align items */
+    gap: 20px; /* Add space between the canvas and prediction box */
+}
+
+/* Canvas styling */
+#mainCanvas {
+    border: 2px solid #ffffff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    background-color: #000;
+}
+
+/* Prediction box styling */
+#prediction-box {
+    width: 200px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+#prediction-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #ffee00;
+}
+
+#prediction-content {
+    font-size: 16px;
+    text-align: center;
+    color: #ffffff;
+}
+
+/* Buttons styling */
+#buttons-box button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+    background: #1e1e2f;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+#buttons-box button:hover {
+    background: #3a3a5f;
+    border-color: #ffee00;
+    color: #ffee00;
+    transform: scale(1.02);
+}
+
+#buttons-box button:active {
+    background: #ffee00;
+    color: #1e1e2f;
+    transform: scale(0.95);
+}
